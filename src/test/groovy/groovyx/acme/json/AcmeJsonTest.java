@@ -1,65 +1,26 @@
 /***/
 package groovyx.acme.json;
 
-import groovy.json.*
+import groovy.json.*;
 
-import java.util.regex.Matcher
-import java.util.regex.Pattern;
+import java.io.CharArrayWriter;
 
-class AcmeJsonTest extends GroovyTestCase {
 
-    static String json = "{\"x\":\"y\\n\\tz\",\"o\":"+(' '*220000)+"{\"aaa\":1,\"b\":[21,{\"22\":2}"+(",23,24,255,266,37777"*100)+"],\"c\":3,\"d\":\"y\\n\\tz\"}}"
-    String path = "\$.o.b";
-    int count=200000;
+//@groovy.transform.CompileStatic
+public class AcmeJsonTest extends groovy.util.GroovyTestCase {
+
+    static String json = "{\"x\":\"y\\n\\tz\",\"o\":"+R(" \t",220000)+"{\"aaa\":1,\"b\":[21,{\"22\":2}"+R(",23,24,255,266,37777",100)+"],\"c\":3,\"d\":\"y\\n\\tz\"}}";
+    int count=30000;
     long sleep = 0; //ms
+
+    static String R(String s, int r){
+        StringBuilder sb = new StringBuilder(r*s.length()+2);
+        for(int i=0;i<r;i++)sb.append(s);
+        return sb.toString();
+    }
+    static void println(String s){ System.out.println(s);}
+    public AcmeJsonTest(){}
 /*
-    public void testCapturer(){
-        def r = new StringReader("1234567890abcdefghijklmnopqrstuv");
-        def c = new Capturer(r, 10);
-        assert c.read()==(char)'1'
-        assert c.read()==(char)'2'
-        assert c.read()==(char)'3'
-        c.startCapture();
-        assert c.read()==(char)'4'
-        assert c.read()==(char)'5'
-        assert c.read()==(char)'6'
-        assert c.read()==(char)'7'
-        assert c.read()==(char)'8'
-        assert c.read()==(char)'9'
-        assert c.read()==(char)'0'
-        assert c.read()==(char)'a'
-        assert c.read()==(char)'b'
-        assert c.read()==(char)'c'
-        assert c.read()==(char)'d'
-        assert c.read()==(char)'e'
-        c.endCapture().toString()=="4567890abcd";
-    }
-    public void testCapturer2(){
-        def r = new StringReader("1234567890abcdefghijklmnopqrstuv");
-        def c = new Capturer(r, 10);
-        assert c.read()==(char)'1'
-        assert c.read()==(char)'2'
-        assert c.read()==(char)'3'
-
-        c.startCapture();
-        assert c.read()==(char)'4'
-        assert c.read()==(char)'5'
-        c.endCapture().toString()=="4";
-        assert c.read()==(char)'6'
-
-        assert c.read()==(char)'7'
-        assert c.read()==(char)'8'
-        assert c.read()==(char)'9'
-        c.startCapture();
-        assert c.read()==(char)'0'
-        assert c.read()==(char)'a'
-        assert c.read()==(char)'b'
-        assert c.read()==(char)'c'
-        assert c.read()==(char)'d'
-        assert c.read()==(char)'e'
-        c.endCapture().toString()=="0abcd";
-    }
-
     public void testX0(){
         def out = new StringWriter()
         new XJsonParser(new AcmeJsonWriter(out,true)).parse(json)
@@ -96,46 +57,35 @@ class AcmeJsonTest extends GroovyTestCase {
 
 
 
-    @groovy.transform.CompileStatic
-    public void testLoadALL(){
+    public void testLoadALL()throws Exception{
         long t=0;
-        def out=null;
-        if(sleep)Thread.sleep(sleep)
+        CharArrayWriter out=null;
+        if(sleep>0)Thread.sleep(sleep);
 
 
-
-        println "testLoadW"
-        out = new CharArrayWriter()
+        println("testLoadW");
+        out = new CharArrayWriter();
         System.gc();
         Thread.sleep(1000);
-        t=System.currentTimeMillis()
+        t=System.currentTimeMillis();
         for(int i=0;i<count;i++) {
             out.reset();
-            new WJsonParser(new AcmeJsonWriter(out)).parse(json)
+            new WJsonParser(new AcmeJsonWriter(out)).parse(json);
         }
-        println "t = ${(System.currentTimeMillis()-t)/1000.0} sec"
+        println("t = "+ ((System.currentTimeMillis()-t)/1000.0)+ " sec");
 
-        println "testLoadY"
-        out = new CharArrayWriter()
+        println("testLoadY");
+        out = new CharArrayWriter();
         System.gc();
         Thread.sleep(1000);
-        t=System.currentTimeMillis()
+        t=System.currentTimeMillis();
         for(int i=0;i<count;i++) {
             out.reset();
-            new YJsonParser(new AcmeJsonWriter(out)).parse(json)
+            new YJsonParser(new AcmeJsonWriter(out)).parse(json);
         }
-        println "t = ${(System.currentTimeMillis()-t)/1000.0} sec"
-
-        println "testLoadZ"
-        out = new CharArrayWriter()
-        System.gc();
-        Thread.sleep(1000);
-        t=System.currentTimeMillis()
-        for(int i=0;i<count;i++) {
-            out.reset();
-            new ZJsonParser(new AcmeJsonWriter(out)).parse(json)
-        }
-        println "t = ${(System.currentTimeMillis()-t)/1000.0} sec"
+        println("t = "+ ((System.currentTimeMillis()-t)/1000.0)+ " sec");
+		/*
+        */
 
     }
     /*

@@ -432,7 +432,7 @@ public class ZJsonParser {
     */
 
     //reads next char from buffer or from reader into `current` member.
-    public void read() throws IOException {
+    private void read() throws IOException {
         if(_captureStart==-1 && bufpos>readAheadSize)bufCompact();
         //int next = -1;
         if(bufpos<bufend)current=buf[bufpos++];
@@ -465,14 +465,14 @@ public class ZJsonParser {
         }
     }
 
-    public void startCapture(){
+    private void startCapture(){
         if(_captureStart!=-1)throw new IllegalStateException("startCapture() already called");
         if(bufpos<1)throw new IllegalStateException("`bufpos` must be greater then zero startCapture() called");
         _captureStart=bufpos-1;
     }
 
     /** returns captured buffer */
-    public void _endCapture(){
+    private void _endCapture(){
         if(_captureStart==-1)throw new IllegalStateException("startCapture() not called");
         //String capture = new String(buf, captureStart, bufpos-captureStart-1);
         _captureStart=-1;
