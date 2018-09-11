@@ -1,0 +1,28 @@
+plugins {
+	id "maven"
+	id "maven-publish"
+	id "groovy"
+    id "com.jfrog.bintray" version "1.8.4"
+}
+
+group 'acme-groovy'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'groovy'
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compileOnly (
+		[group: "org.codehaus.groovy",   name: "groovy-all"   	        , version: "2.4.12"],
+	)
+	testCompile (
+		[group: "org.codehaus.groovy",   name: "groovy-all"   	        , version: "2.4.12"],
+		[group: "junit",   name: "junit"   	        , version: "4.11"],
+	)
+}
