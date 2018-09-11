@@ -9,14 +9,14 @@ import java.math.BigDecimal;
  * A streaming parser for JSON text. The parser reports all events to a given handler.
  */
 public class YJsonParser {
-    public static final int[] CHARS = initChars();
+    static final int[] CHARS = initChars();
     public static final int SPACE_CHARS = 1;
     public static final int DIGIT_CHARS = 2;
     public static final int HEX_CHARS = 4;
     public static final int SIGN_CHARS = 8;
 
     private final static int[] initChars() {
-        int[] cc = new int[256 * 256];
+        int[] cc = new int[256];// * 256];
         cc[' '] = SPACE_CHARS;
         cc['\r'] = SPACE_CHARS;
         cc['\n'] = SPACE_CHARS;
@@ -29,22 +29,25 @@ public class YJsonParser {
         return cc;
     }
 
-    public static final boolean isChar(int ch, int type) {
-        return ch > 0 && (CHARS[ch] & type) == type;
+    static final boolean isChar(int ch, int type) {
+        try {
+            return (CHARS[ch] & type) == type;
+        }catch(Throwable t){
+            return false;
+        }
     }
 
 
     private void readWhileSpace() throws IOException {
-        //while (isWhiteSpace()) {
         while (isChar(current, SPACE_CHARS)) {
             read();
         }
     }
-  /*
-  private boolean isWhiteSpace() {
-    return current == ' ' || current == '\t' || current == '\n' || current == '\r';
-  }
-  */
+    private void readWhileDigit() throws IOException {
+        while (isChar(current, DIGIT_CHARS)) {
+            read();
+        }
+    }
 
     private static final int MAX_NESTING_LEVEL = 1000;
     private static final int MIN_BUFFER_SIZE = 10;
@@ -61,7 +64,7 @@ public class YJsonParser {
     private int current;
     private StringBuilder captureBuffer;
     private int captureStart;
-    private int nestingLevel;
+    //private int nestingLevel;
 
     private AcmeJsonPath path = new AcmeJsonPath();
 
@@ -138,8 +141,8 @@ public class YJsonParser {
         if (reader == null) {
             throw new NullPointerException("reader is null");
         }
-        if (buffersize <= 0) {
-            throw new IllegalArgumentException("buffersize is zero or negative");
+        if (buffersize <= MIN_BUFFER_SIZE) {
+            buffersize = MIN_BUFFER_SIZE;
         }
         this.reader = reader;
         buffer = new char[buffersize];
@@ -200,12 +203,11 @@ public class YJsonParser {
     private void readArray() throws IOException {
         handler.onArrayStart(path);
         read();
-        if (++nestingLevel > MAX_NESTING_LEVEL) {
+        if (this.path.size() > MAX_NESTING_LEVEL) {
             throw error("Nesting too deep");
         }
         readWhileSpace();
         if (readChar(']')) {
-            nestingLevel--;
             handler.onArrayEnd(path);
             return;
         }
@@ -221,19 +223,17 @@ public class YJsonParser {
         if (!readChar(']')) {
             throw expected("',' or ']'");
         }
-        nestingLevel--;
         handler.onArrayEnd(path);
     }
 
     private void readObject() throws IOException {
         handler.onObjectStart(path);
         read();
-        if (++nestingLevel > MAX_NESTING_LEVEL) {
+        if (this.path.size() > MAX_NESTING_LEVEL) {
             throw error("Nesting too deep");
         }
         readWhileSpace();
         if (readChar('}')) {
-            nestingLevel--;
             handler.onObjectEnd(path);
             return;
         }
@@ -255,7 +255,6 @@ public class YJsonParser {
         if (!readChar('}')) {
             throw expected("',' or '}'");
         }
-        nestingLevel--;
         handler.onObjectEnd(path);
     }
 
@@ -347,7 +346,7 @@ public class YJsonParser {
                 char[] hexChars = new char[4];
                 for (int i = 0; i < 4; i++) {
                     read();
-                    if (!isHexDigit()) {
+                    if (!isChar(current, HEX_CHARS)) {
                         throw expected("hexadecimal digit");
                     }
                     hexChars[i] = (char) current;
@@ -368,8 +367,7 @@ public class YJsonParser {
             throw expected("digit");
         }
         if (firstDigit != '0') {
-            while (readDigit()) {
-            }
+            readWhileDigit();
         }
         readFraction();
         readExponent();
@@ -383,8 +381,7 @@ public class YJsonParser {
         if (!readDigit()) {
             throw expected("digit");
         }
-        while (readDigit()) {
-        }
+        readWhileDigit();
         return true;
     }
 
@@ -398,25 +395,24 @@ public class YJsonParser {
         if (!readDigit()) {
             throw expected("digit");
         }
-        while (readDigit()) {
-        }
+        readWhileDigit();
         return true;
     }
 
     private boolean readChar(char ch) throws IOException {
-        if (current != ch) {
-            return false;
+        if (current == ch) {
+            read();
+            return true;
         }
-        read();
-        return true;
+        return false;
     }
 
     private boolean readDigit() throws IOException {
-        if (!isDigit()) {
-            return false;
+        if (isChar(current, DIGIT_CHARS)) {
+            read();
+            return true;
         }
-        read();
-        return true;
+        return false;
     }
 
     private void read() throws IOException {
@@ -476,17 +472,6 @@ public class YJsonParser {
 
     private ParseException error(String message) {
         return new ParseException(message, line, 0);
-    }
-
-
-    private boolean isDigit() {
-        return current >= '0' && current <= '9';
-    }
-
-    private boolean isHexDigit() {
-        return current >= '0' && current <= '9'
-                || current >= 'a' && current <= 'f'
-                || current >= 'A' && current <= 'F';
     }
 
     private boolean isEndOfText() {

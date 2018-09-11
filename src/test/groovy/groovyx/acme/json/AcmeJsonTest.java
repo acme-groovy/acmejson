@@ -9,7 +9,7 @@ import java.io.CharArrayWriter;
 //@groovy.transform.CompileStatic
 public class AcmeJsonTest extends groovy.util.GroovyTestCase {
 
-    static String json = "{\"x\":\"y\\n\\tz\",\"o\":"+R(" \t",220000)+"{\"aaa\":1,\"b\":[21,{\"22\":2}"+R(",23,24,255,266,37777",100)+"],\"c\":3,\"d\":\"y\\n\\tz\"}}";
+    static String json = "{\"x\":\"y\\n\\tz\",\"o\":"+R(" \t",220000)+"{\"aaa\":1,\"b\":[21,{\"22\":2}"+R(",23,24,255,266,9991,9992,9993,9994",100)+"],\"c\":3,\"d\":\"y\\n\\tz\"}}";
     int count=30000;
     long sleep = 0; //ms
 
