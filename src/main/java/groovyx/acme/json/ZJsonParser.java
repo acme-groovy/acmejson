@@ -25,7 +25,6 @@ public class ZJsonParser {
     private int bufpos; //current read position in buffer
     private int bufend; //points to position where to append buffer on read
     private int _captureStart; //where capture started (from bufpos-1)
-    private boolean eof; //eof encountered
     private Reader in;
 
     private int maxNestLevel = DEFAULT_MAX_NESTING_LEVEL;
@@ -59,6 +58,9 @@ public class ZJsonParser {
         for(char i='A';i<='F';i++)cc[i] = HEX_CHARS;
         return cc;
     }
+    public static final boolean isChar(int ch, int type){
+    	return ch>0 && (CHARS[ch]&type)==type;
+    }
 
     /*
     private final void readWhile(int CHARS_TYPE) throws IOException {
@@ -69,11 +71,11 @@ public class ZJsonParser {
         }catch(ArrayIndexOutOfBoundsException e){}
     }
     */
+    /*
   private final void readWhileSpace() throws IOException {
-    while (current == ' ' || current == '\t' || current == '\n' || current == '\r') {
-      read();
-    }
-  }
+    //while ( current == ' ' || current == '\t' || current == '\n' || current == '\r') {
+    while ( isChar(current, SPACE_CHARS) )read();
+  }*/
 
     public ZJsonParser setMaxNestLevel(int maxNestLevel) {
         this.maxNestLevel = maxNestLevel <= 0 ? DEFAULT_MAX_NESTING_LEVEL : maxNestLevel;
@@ -123,22 +125,21 @@ public class ZJsonParser {
         if (reader == null) {
             throw new NullPointerException("reader is null");
         }
-        if (this.readAheadSize <= 10) this.readAheadSize=10;
+        if (this.readAheadSize < 10) this.readAheadSize=10;
 
         this.in = reader;
         this.buf = new char[this.readAheadSize + this.readAheadSize/5];
         this.bufpos = 0;
         this.bufend = 0;
         this._captureStart = -1; //not started
-        this.eof = false;
         this.line=1;
         this.column=0;
         this.current = 0;
 
         read();
-        readWhileSpace();//readWhile(SPACE_CHARS);
+        while ( isChar(current, SPACE_CHARS) )read();//readWhileSpace();//readWhile(SPACE_CHARS);
         readValue();
-        readWhileSpace();//readWhile(SPACE_CHARS);
+        while ( isChar(current, SPACE_CHARS) )read();//readWhileSpace();//readWhile(SPACE_CHARS);
         if (!isEndOfText()) {
             throw error("Unexpected character");
         }
@@ -185,7 +186,7 @@ public class ZJsonParser {
     private void readArray() throws IOException {
         handler.onArrayStart(path);
         read();
-        readWhileSpace();//readWhile(SPACE_CHARS);
+        while ( isChar(current, SPACE_CHARS) )read();//readWhileSpace();//readWhile(SPACE_CHARS);
         if (readChar(']')) {
             handler.onArrayEnd(path);
             return;
@@ -193,11 +194,11 @@ public class ZJsonParser {
         int index = 0;
         do {
             this.path.push(index, null);
-            if (this.path.size() > maxNestLevel) throw error("Nesting too deep");
-            readWhileSpace();//readWhile(SPACE_CHARS);
+            //if (this.path.size() > maxNestLevel) throw error("Nesting too deep");
+            while ( isChar(current, SPACE_CHARS) )read();//readWhileSpace();//readWhile(SPACE_CHARS);
             readValue();
             this.path.pop();
-            readWhileSpace();//readWhile(SPACE_CHARS);
+            while ( isChar(current, SPACE_CHARS) )read();//readWhileSpace();//readWhile(SPACE_CHARS);
             index++;
         } while (readChar(','));
         if (!readChar(']')) {
@@ -209,25 +210,25 @@ public class ZJsonParser {
     private void readObject() throws IOException {
         handler.onObjectStart(path);
         read();
-        readWhileSpace();//readWhile(SPACE_CHARS);
+        while ( isChar(current, SPACE_CHARS) )read();//readWhileSpace();//readWhile(SPACE_CHARS);
         if (readChar('}')) {
             handler.onObjectEnd(path);
             return;
         }
         int index = 0;
         do {
-            readWhileSpace();//readWhile(SPACE_CHARS);
+            while ( isChar(current, SPACE_CHARS) )read();//readWhileSpace();//readWhile(SPACE_CHARS);
             String name = readName();
-            readWhileSpace();//readWhile(SPACE_CHARS);
+            while ( isChar(current, SPACE_CHARS) )read();//readWhileSpace();//readWhile(SPACE_CHARS);
             if (!readChar(':')) {
                 throw expected("':'");
             }
-            readWhileSpace();//readWhile(SPACE_CHARS);
+            while ( isChar(current, SPACE_CHARS) )read();//readWhileSpace();//readWhile(SPACE_CHARS);
             path.push(index, name);
-            if (this.path.size() > maxNestLevel)throw error("Nesting too deep");
+            //if (this.path.size() > maxNestLevel)throw error("Nesting too deep");
             readValue();
             path.pop();
-            readWhileSpace();//readWhile(SPACE_CHARS);
+            while ( isChar(current, SPACE_CHARS) )read();//readWhileSpace();//readWhile(SPACE_CHARS);
             index++;
         } while (readChar(','));
         if (!readChar('}')) {
@@ -281,17 +282,15 @@ public class ZJsonParser {
     private String readStringInternal() throws IOException {
         read();
         startCapture(); //just mark current position to be kept in buf
-        int bufendNew = bufend;
+        int escape = -1; //position of the first escape symbol
         while (current != '"') {
-            switch (current) {
-            case '\\':
-                buf[bufendNew++] = (char) _readEscape();
-                break;
-            default:
-                buf[bufendNew++] = (char) current;
-                read();
-                break;
+        	if(current==-1){
+        		throw expected("end of string");
+            }else if(current=='\\'){
+            	escape = escape==-1?bufpos:escape;
+            	read();
             }
+            read();
         }
         String string = new String(buf, _captureStart, bufpos-_captureStart-1);
         _endCapture();
@@ -328,7 +327,8 @@ public class ZJsonParser {
             char[] hexChars = new char[4];
             for (int i = 0; i < 4; i++) {
                 read();
-                if (!isHexDigit()) {
+                //if (!isHexDigit()) {
+                if (!isChar(current, HEX_CHARS)) {
                     throw expected("hexadecimal digit");
                 }
                 hexChars[i] = (char) current;
@@ -367,8 +367,7 @@ public class ZJsonParser {
         if (!readDigit()) {
             throw expected("digit");
         }
-        while (readDigit()) {
-        }
+        while (readDigit()) {}
         return true;
     }
 
@@ -382,8 +381,7 @@ public class ZJsonParser {
         if (!readDigit()) {
             throw expected("digit");
         }
-        while (readDigit()) {
-        }
+        while (readDigit()) {}
         return true;
     }
 
@@ -396,7 +394,8 @@ public class ZJsonParser {
     }
 
     private boolean readDigit() throws IOException {
-        if (!isDigit()) {
+        //if (!isDigit()) {
+        if (!isChar(current, DIGIT_CHARS)) {
             return false;
         }
         read();
@@ -411,7 +410,8 @@ public class ZJsonParser {
             //System.out.println("compact bufpos="+bufpos+" bufend="+bufend+" size="+buf.length);
         }
     }
-    private void bufFill() throws IOException{
+    /*
+    private void bufRead() throws IOException{
         if(eof || bufpos<bufend)return;
         if(_captureStart==-1){
             bufend=0;
@@ -429,7 +429,7 @@ public class ZJsonParser {
         }
         //System.out.println("fill bufpos="+bufpos+" bufend="+bufend+" size="+buf.length);
     }
-
+    */
 
     //reads next char from buffer or from reader into `current` member.
     public void read() throws IOException {
@@ -437,9 +437,25 @@ public class ZJsonParser {
         //int next = -1;
         if(bufpos<bufend)current=buf[bufpos++];
         else {
-            bufFill();
-            if(bufpos<bufend)current=buf[bufpos++];
-            else current=-1;
+        	//need to read from reader...
+            if(_captureStart==-1){
+            	//if capture not started reset buffer
+                bufend=0;
+                bufpos=0;
+            }else if(bufend+readAheadSize>buf.length){
+                //System.out.println("  >>> resize buf");
+                buf = Arrays.copyOf(buf, bufend+readAheadSize);
+            }
+            int r = in.read( buf, bufend, readAheadSize );
+            if(r==-1 || r==0){ //when r==0 ???
+                current=-1;
+            }else{
+                bufend += r;
+                current=buf[bufpos++];
+            }
+            //bufRead();
+            //if(bufpos<bufend)current=buf[bufpos++];
+            //else current=-1;
         }
         column++;
         if (current == '\n') {
@@ -477,6 +493,7 @@ public class ZJsonParser {
         return new ParseException(message, line, 0);
     }
 
+    /*
     private boolean isWhiteSpace() {
         return current == ' ' || current == '\t' || current == '\n' || current == '\r';
     }
@@ -488,7 +505,7 @@ public class ZJsonParser {
     private boolean isHexDigit() {
         return current >= '0' && current <= '9' || current >= 'a' && current <= 'f' || current >= 'A' && current <= 'F';
     }
-
+    */
     private boolean isEndOfText() {
         return current == -1;
     }

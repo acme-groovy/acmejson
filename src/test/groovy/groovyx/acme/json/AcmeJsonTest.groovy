@@ -1,3 +1,4 @@
+/***/
 package groovyx.acme.json;
 
 import groovy.json.*
@@ -7,9 +8,10 @@ import java.util.regex.Pattern;
 
 class AcmeJsonTest extends GroovyTestCase {
 
-    static String json = "{\"x\":\"y\\n\\tz\",\"o\":"+(' '*2200000)+"{\"aaa\":1,\"b\":[21,{\"22\":2},23,24],\"c\":3,\"d\":\"y\\n\\tz\"}}"
+    static String json = "{\"x\":\"y\\n\\tz\",\"o\":"+(' '*220000)+"{\"aaa\":1,\"b\":[21,{\"22\":2}"+(",23,24,255,266,37777"*100)+"],\"c\":3,\"d\":\"y\\n\\tz\"}}"
     String path = "\$.o.b";
-    int count=1;//2000;
+    int count=200000;
+    long sleep = 0; //ms
 /*
     public void testCapturer(){
         def r = new StringReader("1234567890abcdefghijklmnopqrstuv");
@@ -75,6 +77,13 @@ class AcmeJsonTest extends GroovyTestCase {
         new WJsonParser(new AcmeJsonWriter(out, true)).parse(json)
         println out;
     }
+    public void testW0() {
+        println "W::"
+        def out = new StringWriter()
+        new WJsonParser(new AcmeJsonWriter(out, true)).parse(json)
+        println out;
+    }
+
     public void testZ0() {
         println "Z::"
         def out = new StringWriter()
@@ -82,11 +91,68 @@ class AcmeJsonTest extends GroovyTestCase {
         println out;
     }
 
+
 */
+
+
+
+    @groovy.transform.CompileStatic
+    public void testLoadALL(){
+        long t=0;
+        def out=null;
+        if(sleep)Thread.sleep(sleep)
+
+
+
+        println "testLoadW"
+        out = new CharArrayWriter()
+        System.gc();
+        Thread.sleep(1000);
+        t=System.currentTimeMillis()
+        for(int i=0;i<count;i++) {
+            out.reset();
+            new WJsonParser(new AcmeJsonWriter(out)).parse(json)
+        }
+        println "t = ${(System.currentTimeMillis()-t)/1000.0} sec"
+
+        println "testLoadY"
+        out = new CharArrayWriter()
+        System.gc();
+        Thread.sleep(1000);
+        t=System.currentTimeMillis()
+        for(int i=0;i<count;i++) {
+            out.reset();
+            new YJsonParser(new AcmeJsonWriter(out)).parse(json)
+        }
+        println "t = ${(System.currentTimeMillis()-t)/1000.0} sec"
+
+        println "testLoadZ"
+        out = new CharArrayWriter()
+        System.gc();
+        Thread.sleep(1000);
+        t=System.currentTimeMillis()
+        for(int i=0;i<count;i++) {
+            out.reset();
+            new ZJsonParser(new AcmeJsonWriter(out)).parse(json)
+        }
+        println "t = ${(System.currentTimeMillis()-t)/1000.0} sec"
+
+    }
+    /*
+    @groovy.transform.CompileStatic
+    public void testLoadYJP(){
+        println "testLoadYJP"
+        if(sleep)Thread.sleep(sleep)
+        def out = new CharArrayWriter()
+        for(int i=0;i<count;i++) {
+            out.reset();
+            new YJsonParser(new AcmeJsonWriter(out)).parse(json)
+        }
+    }
     @groovy.transform.CompileStatic
     public void testLoadZJP(){
         println "testLoadZJP"
-        Thread.sleep(10000)
+        if(sleep)Thread.sleep(sleep)
         def out = new CharArrayWriter()
         for(int i=0;i<count;i++) {
             out.reset();
@@ -96,7 +162,7 @@ class AcmeJsonTest extends GroovyTestCase {
     @groovy.transform.CompileStatic
     public void testLoadWJP(){
         println "testLoadWJP"
-        Thread.sleep(10000)
+        if(sleep)Thread.sleep(sleep)
         def out = new CharArrayWriter()
         for(int i=0;i<count;i++) {
             out.reset();
