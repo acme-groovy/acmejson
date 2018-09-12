@@ -16,6 +16,7 @@ public class AcmeJsonBuilder implements AcmeJsonHandler {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onObjectStart(AcmeJsonPath jpath) {
         LinkedHashMap<String,Object> map = new LinkedHashMap<>();
         objectStack.push(map);
@@ -33,6 +34,7 @@ public class AcmeJsonBuilder implements AcmeJsonHandler {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onArrayStart(AcmeJsonPath jpath) {
         ArrayList<Object> arr = new ArrayList<>();
         objectStack.push(arr);
@@ -51,6 +53,7 @@ public class AcmeJsonBuilder implements AcmeJsonHandler {
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onValue(AcmeJsonPath jpath, Object value) {
         if(jpath.peek().isKey) ((LinkedHashMap) current).put(jpath.peek().key, value);
         else ((ArrayList)current).add(value);

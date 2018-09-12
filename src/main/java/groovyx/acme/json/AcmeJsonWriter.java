@@ -9,6 +9,7 @@ public class AcmeJsonWriter implements AcmeJsonHandler{
 
     Writer writer;
     boolean space=false;  //without indent by default
+    int indent = 0;
 
     public AcmeJsonWriter(Writer writer){
         this.writer=writer;
@@ -32,10 +33,10 @@ public class AcmeJsonWriter implements AcmeJsonHandler{
             if(space) str+=printIndent(jpath);
             if(jpath.peek().isKey) {
                 str+="\""+jpath.peek().key+"\":";
-                if(space) jpath.indent += 2;
+                if(space) indent += 2;
             }
         }
-        if(space) jpath.indent++;
+        if(space) indent++;
         str+="{";
         try {
             writer.write(str);
@@ -47,11 +48,11 @@ public class AcmeJsonWriter implements AcmeJsonHandler{
 
     @Override
     public void onObjectEnd(AcmeJsonPath jpath) {
-        if(space) jpath.indent--;
+        if(space) indent--;
         String str="";
         if(space) str+=printIndent(jpath);
         str+="}";
-        if(space) if(jpath.size()>0 && jpath.peek().isKey) jpath.indent-=2;
+        if(space) if(jpath.size()>0 && jpath.peek().isKey) indent-=2;
         try {
             writer.write(str);
         } catch (IOException e) {
@@ -67,10 +68,10 @@ public class AcmeJsonWriter implements AcmeJsonHandler{
             if(space) str+=printIndent(jpath);
             if(jpath.peek().isKey) {
                 str+=JsonOutput.toJson(jpath.peek().key)+":";
-                if(space) jpath.indent += 2;
+                if(space) indent += 2;
             }
         }
-        if(space) jpath.indent++;
+        if(space) indent++;
         str+="[";
         try {
             writer.write(str);
@@ -81,11 +82,11 @@ public class AcmeJsonWriter implements AcmeJsonHandler{
 
     @Override
     public void onArrayEnd(AcmeJsonPath jpath) {
-        if(space) jpath.indent--;
+        if(space) indent--;
         String str="";
         if(space) str+=printIndent(jpath);
         str+="]";
-        if(space) if(jpath.size()>0 && jpath.peek().isKey) jpath.indent-=2;
+        if(space) if(jpath.size()>0 && jpath.peek().isKey) indent-=2;
         try {
             writer.write(str);
         } catch (IOException e) {
@@ -117,7 +118,7 @@ public class AcmeJsonWriter implements AcmeJsonHandler{
 
     private String printIndent (AcmeJsonPath jpath){
         String str="\n";
-        for (int i = 0; i < jpath.indent; i++) {
+        for (int i = 0; i < indent; i++) {
             str += "  ";
         }
         return str;

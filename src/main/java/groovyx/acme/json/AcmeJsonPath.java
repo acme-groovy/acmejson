@@ -4,7 +4,7 @@ import java.util.Stack;
 
 public class AcmeJsonPath extends Stack<AcmeJsonPath.Element>{
 
-    int indent=0;
+    //int indent=0;
 
     public AcmeJsonPath(){super();}
 

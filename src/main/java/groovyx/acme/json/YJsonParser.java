@@ -10,28 +10,29 @@ import java.math.BigDecimal;
  */
 public class YJsonParser {
     static final int[] CHARS = initChars();
-    public static final int SPACE_CHARS = 1;
-    public static final int DIGIT_CHARS = 2;
-    public static final int HEX_CHARS = 4;
-    public static final int SIGN_CHARS = 8;
+    public static final int SPACE_CHAR = 1;
+    public static final int DIGIT_CHAR = 2;
+    public static final int HEX_CHAR = 4;
+    public static final int SIGN_CHAR = 8;
+    public static final int MINUS_CHAR = 16;
 
     private final static int[] initChars() {
         int[] cc = new int[256];// * 256];
-        cc[' '] = SPACE_CHARS;
-        cc['\r'] = SPACE_CHARS;
-        cc['\n'] = SPACE_CHARS;
-        cc['\t'] = SPACE_CHARS;
-        cc['+'] = SIGN_CHARS;
-        cc['-'] = SIGN_CHARS;
-        for (char i = '0'; i <= '9'; i++) cc[i] = DIGIT_CHARS | HEX_CHARS;
-        for (char i = 'a'; i <= 'f'; i++) cc[i] = HEX_CHARS;
-        for (char i = 'A'; i <= 'F'; i++) cc[i] = HEX_CHARS;
+        cc[' '] = SPACE_CHAR;
+        cc['\r'] = SPACE_CHAR;
+        cc['\n'] = SPACE_CHAR;
+        cc['\t'] = SPACE_CHAR;
+        cc['+'] = SIGN_CHAR;
+        cc['-'] = SIGN_CHAR | MINUS_CHAR;
+        for (char i = '0'; i <= '9'; i++) cc[i] = DIGIT_CHAR | HEX_CHAR;
+        for (char i = 'a'; i <= 'f'; i++) cc[i] = HEX_CHAR;
+        for (char i = 'A'; i <= 'F'; i++) cc[i] = HEX_CHAR;
         return cc;
     }
 
     static final boolean isChar(int ch, int type) {
         try {
-            return (CHARS[ch] & type) == type;
+            return (CHARS[ch] & type) != 0;
         }catch(Throwable t){
             return false;
         }
@@ -39,12 +40,12 @@ public class YJsonParser {
 
 
     private void readWhileSpace() throws IOException {
-        while (isChar(current, SPACE_CHARS)) {
+        while (isChar(current, SPACE_CHAR)) {
             read();
         }
     }
     private void readWhileDigit() throws IOException {
-        while (isChar(current, DIGIT_CHARS)) {
+        while (isChar(current, DIGIT_CHAR)) {
             read();
         }
     }
@@ -104,6 +105,7 @@ public class YJsonParser {
         int bufferSize = Math.max(MIN_BUFFER_SIZE, Math.min(DEFAULT_BUFFER_SIZE, string.length()));
         try {
             parse(new StringReader(string), bufferSize);
+            //parse(new AcmeCharSequenceReader(string), bufferSize);
         } catch (IOException exception) {
             // StringReader does not throw IOException
             throw new RuntimeException(exception);
@@ -182,21 +184,9 @@ public class YJsonParser {
             case '{':
                 readObject();
                 break;
-            case '-':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                readNumber();
-                break;
             default:
-                throw expected("value");
+                if(isChar(current,DIGIT_CHAR|MINUS_CHAR))readNumber();
+                else throw expected("value");
         }
     }
 
@@ -346,7 +336,7 @@ public class YJsonParser {
                 char[] hexChars = new char[4];
                 for (int i = 0; i < 4; i++) {
                     read();
-                    if (!isChar(current, HEX_CHARS)) {
+                    if (!isChar(current, HEX_CHAR)) {
                         throw expected("hexadecimal digit");
                     }
                     hexChars[i] = (char) current;
@@ -408,7 +398,7 @@ public class YJsonParser {
     }
 
     private boolean readDigit() throws IOException {
-        if (isChar(current, DIGIT_CHARS)) {
+        if (isChar(current, DIGIT_CHAR)) {
             read();
             return true;
         }
