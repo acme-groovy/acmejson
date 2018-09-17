@@ -9,46 +9,19 @@ import java.math.BigDecimal;
  * A streaming parser for JSON text. The parser reports all events to a given handler.
  */
 public class YJsonParser {
-    static final int[] CHARS = initChars();
-    public static final int SPACE_CHAR = 1;
-    public static final int DIGIT_CHAR = 2;
-    public static final int HEX_CHAR = 4;
-    public static final int SIGN_CHAR = 8;
-    public static final int MINUS_CHAR = 16;
-
-    private final static int[] initChars() {
-        int[] cc = new int[256];// * 256];
-        cc[' '] = SPACE_CHAR;
-        cc['\r'] = SPACE_CHAR;
-        cc['\n'] = SPACE_CHAR;
-        cc['\t'] = SPACE_CHAR;
-        cc['+'] = SIGN_CHAR;
-        cc['-'] = SIGN_CHAR | MINUS_CHAR;
-        for (char i = '0'; i <= '9'; i++) cc[i] = DIGIT_CHAR | HEX_CHAR;
-        for (char i = 'a'; i <= 'f'; i++) cc[i] = HEX_CHAR;
-        for (char i = 'A'; i <= 'F'; i++) cc[i] = HEX_CHAR;
-        return cc;
+    static final boolean isSpaceChar(int ch) {
+        return ch==' ' || ch=='\t' || ch=='\r' || ch=='\n';
+    }
+    static final boolean isDigitChar(int ch) {
+        return ch>='0' && ch<='9';
+    }
+    static final boolean isDigitOrSign(int ch) {
+        return ch>='0' && ch<='9' || ch=='-';
+    }
+    static final boolean isHexChar(int ch) {
+        return ch>='0' && ch<='9' || ch>='a' && ch<='f' || ch>='A' && ch<='F';
     }
 
-    static final boolean isChar(int ch, int type) {
-        try {
-            return (CHARS[ch] & type) != 0;
-        }catch(Throwable t){
-            return false;
-        }
-    }
-
-
-    private void readWhileSpace() throws IOException {
-        while (isChar(current, SPACE_CHAR)) {
-            read();
-        }
-    }
-    private void readWhileDigit() throws IOException {
-        while (isChar(current, DIGIT_CHAR)) {
-            read();
-        }
-    }
 
     private static final int MAX_NESTING_LEVEL = 1000;
     private static final int MIN_BUFFER_SIZE = 10;
@@ -156,9 +129,9 @@ public class YJsonParser {
         current = 0;
         captureStart = -1;
         read();
-        readWhileSpace();
+        while (isSpaceChar(current)) read(); //readWhileSpace();
         readValue();
-        readWhileSpace();
+        while (isSpaceChar(current)) read(); //readWhileSpace();
         if (!isEndOfText()) {
             throw error("Unexpected character");
         }
@@ -185,7 +158,7 @@ public class YJsonParser {
                 readObject();
                 break;
             default:
-                if(isChar(current,DIGIT_CHAR|MINUS_CHAR))readNumber();
+                if(isDigitOrSign(current))readNumber();
                 else throw expected("value");
         }
     }
@@ -196,18 +169,18 @@ public class YJsonParser {
         if (this.path.size() > MAX_NESTING_LEVEL) {
             throw error("Nesting too deep");
         }
-        readWhileSpace();
+        while (isSpaceChar(current)) read(); //readWhileSpace();
         if (readChar(']')) {
             handler.onArrayEnd(path);
             return;
         }
         int index = 0;
         do {
-            readWhileSpace();
+            while (isSpaceChar(current)) read(); //readWhileSpace();
             this.path.push(index, null);
             readValue();
             this.path.pop();
-            readWhileSpace();
+            while (isSpaceChar(current)) read(); //readWhileSpace();
             index++;
         } while (readChar(','));
         if (!readChar(']')) {
@@ -222,24 +195,24 @@ public class YJsonParser {
         if (this.path.size() > MAX_NESTING_LEVEL) {
             throw error("Nesting too deep");
         }
-        readWhileSpace();
+        while (isSpaceChar(current)) read(); //readWhileSpace();
         if (readChar('}')) {
             handler.onObjectEnd(path);
             return;
         }
         int index = 0;
         do {
-            readWhileSpace();
+            while (isSpaceChar(current)) read(); //readWhileSpace();
             String name = readName();
-            readWhileSpace();
+            while (isSpaceChar(current)) read(); //readWhileSpace();
             if (!readChar(':')) {
                 throw expected("':'");
             }
-            readWhileSpace();
+            while (isSpaceChar(current)) read(); //readWhileSpace();
             path.push(index, name);
             readValue();
             path.pop();
-            readWhileSpace();
+            while (isSpaceChar(current)) read(); //readWhileSpace();
             index++;
         } while (readChar(','));
         if (!readChar('}')) {
@@ -336,7 +309,7 @@ public class YJsonParser {
                 char[] hexChars = new char[4];
                 for (int i = 0; i < 4; i++) {
                     read();
-                    if (!isChar(current, HEX_CHAR)) {
+                    if (!isHexChar(current)) {
                         throw expected("hexadecimal digit");
                     }
                     hexChars[i] = (char) current;
@@ -357,7 +330,7 @@ public class YJsonParser {
             throw expected("digit");
         }
         if (firstDigit != '0') {
-            readWhileDigit();
+            while (isDigitChar(current)) read(); //readWhileDigit();
         }
         readFraction();
         readExponent();
@@ -371,7 +344,7 @@ public class YJsonParser {
         if (!readDigit()) {
             throw expected("digit");
         }
-        readWhileDigit();
+        while (isDigitChar(current)) read(); //readWhileDigit();
         return true;
     }
 
@@ -385,7 +358,7 @@ public class YJsonParser {
         if (!readDigit()) {
             throw expected("digit");
         }
-        readWhileDigit();
+        while (isDigitChar(current)) read(); //readWhileDigit();
         return true;
     }
 
@@ -398,7 +371,7 @@ public class YJsonParser {
     }
 
     private boolean readDigit() throws IOException {
-        if (isChar(current, DIGIT_CHAR)) {
+        if (isDigitChar(current)) {
             read();
             return true;
         }

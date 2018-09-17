@@ -36,7 +36,7 @@ public class AcmeJsonOutput implements Writable{
     }
 
 
-    private void parseMap(Object object){
+    private void parseMap(Object object) throws IOException {
         writer.onObjectStart(jpath);
         Map map = (Map)object;
         Iterator keys = map.keySet().iterator();
@@ -52,7 +52,7 @@ public class AcmeJsonOutput implements Writable{
     }
 
 
-    private void parseIterator(Object object){
+    private void parseIterator(Object object) throws IOException {
         writer.onArrayStart(jpath);
         Iterator arr = (Iterator)object;
 
@@ -66,7 +66,7 @@ public class AcmeJsonOutput implements Writable{
         return ;
     }
 
-    private void parseValue(Object value) {
+    private void parseValue(Object value) throws IOException {
         if (value instanceof Map) parseMap(value);
         else if (value instanceof Iterable) parseIterator(((Iterable) value).iterator());
         else if (value instanceof Iterator) parseIterator(value);

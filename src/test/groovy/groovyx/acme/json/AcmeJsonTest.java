@@ -10,7 +10,7 @@ import java.io.CharArrayWriter;
 public class AcmeJsonTest extends groovy.util.GroovyTestCase {
 
     static String json = "{\"x\":\"y\\n\\tz\",\"o\":"+R(" \t",220000)+"{\"aaa\":1,\"b\":[21,{\"22\":2}"+R(",23,24,255,266,9991,9992,9993,9994",100)+"],\"c\":3,\"d\":\"y\\n\\tz\"}}";
-    int count=30000;
+    int count=3000;//30000;
     long sleep = 0; //ms
 
     static String R(String s, int r){
@@ -26,68 +26,15 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
         new XJsonParser(new AcmeJsonWriter(out,true)).parse(json)
         println out;
     }
-    public void testY0(){
-        println "Y::"
-        def out = new StringWriter()
-        new YJsonParser(new AcmeJsonWriter(out,true)).parse(json)
-        println out;
-    }
-    public void testW0() {
-        println "W::"
-        def out = new StringWriter()
-        new WJsonParser(new AcmeJsonWriter(out, true)).parse(json)
-        println out;
-    }
-    public void testW0() {
-        println "W::"
-        def out = new StringWriter()
-        new WJsonParser(new AcmeJsonWriter(out, true)).parse(json)
-        println out;
-    }
-
-    public void testZ0() {
-        println "Z::"
-        def out = new StringWriter()
-        new ZJsonParser(new AcmeJsonWriter(out, true)).parse(json)
-        println out;
-    }
-
-
 */
-
-
-
-    public void testLoadALL()throws Exception{
-        long t=0;
-        CharArrayWriter out=null;
-        if(sleep>0)Thread.sleep(sleep);
-
-
-        println("testLoadW");
-        out = new CharArrayWriter();
-        System.gc();
-        Thread.sleep(1000);
-        t=System.currentTimeMillis();
-        for(int i=0;i<count;i++) {
-            out.reset();
-            new WJsonParser(new AcmeJsonWriter(out)).parse(json);
-        }
-        println("t = "+ ((System.currentTimeMillis()-t)/1000.0)+ " sec");
-
-        println("testLoadY");
-        out = new CharArrayWriter();
-        System.gc();
-        Thread.sleep(1000);
-        t=System.currentTimeMillis();
-        for(int i=0;i<count;i++) {
-            out.reset();
-            new YJsonParser(new AcmeJsonWriter(out)).parse(json);
-        }
-        println("t = "+ ((System.currentTimeMillis()-t)/1000.0)+ " sec");
-		/*
-        */
-
+    public void testY0(){
+        println ("Y::");
+        CharArrayWriter out=new CharArrayWriter();
+        new YJsonParser(new AcmeJsonWriter(out,true)).parse(json);
+        println (out.toString());
     }
+
+
     /*
     @groovy.transform.CompileStatic
     public void testLoadYJP(){

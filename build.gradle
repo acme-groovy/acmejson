@@ -28,5 +28,6 @@ dependencies {
 }
 
 compileJava {
-	options.compilerArgs += ["-g:none", "-Xlint:unchecked"]
+//	options.compilerArgs += ["-g:none", "-Xlint:unchecked"]
 }
+

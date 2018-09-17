@@ -136,7 +136,7 @@ public class AcmeJsonParser {
         return this;
     }
 
-    public Object parseText(String text) {
+    public Object parseText(String text) throws IOException {
         if (text == null || text.length() == 0) {
             throw new IllegalArgumentException("The JSON input text should neither be null nor empty.");
         }
@@ -240,7 +240,7 @@ public class AcmeJsonParser {
         }
     }
 
-    public Object parse(Reader reader) {
+    public Object parse(Reader reader) throws IOException {
         if(root==null) root = new AcmeJsonChainHandler().setNext(new AcmeJsonBuilder());
         else if(!current.hasNext) current.setNext(new AcmeJsonBuilder());
 
@@ -265,7 +265,7 @@ public class AcmeJsonParser {
     }
 
 
-    private void parseArray(JsonLexer lexer) {
+    private void parseArray(JsonLexer lexer) throws IOException {
         //List content = new ArrayList();
         root.onArrayStart(jpath);
 
@@ -338,7 +338,7 @@ public class AcmeJsonParser {
     }
 
 
-    private void parseObject(JsonLexer lexer) {
+    private void parseObject(JsonLexer lexer) throws IOException {
         //Map content = new HashMap();
         root.onObjectStart(jpath);
 

@@ -2,6 +2,7 @@ package groovyx.acme.json;
 
 import groovy.lang.Closure;
 
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,7 +42,7 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     }
 
     @Override
-    public void onObjectStart(AcmeJsonPath jpath) {
+    public void onObjectStart(AcmeJsonPath jpath) throws IOException {
         if(!onValue) {
             if (builder == null) {
                 if (pattern != null) {
@@ -59,7 +60,7 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     }
 
     @Override
-    public void onObjectEnd(AcmeJsonPath jpath) {
+    public void onObjectEnd(AcmeJsonPath jpath) throws IOException {
         if(!onValue) {
             if (builder != null && !builder.isDone()) {
                 builder.onObjectEnd(jpath);
@@ -72,7 +73,7 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     }
 
     @Override
-    public void onArrayStart(AcmeJsonPath jpath) {
+    public void onArrayStart(AcmeJsonPath jpath) throws IOException {
         if(!onValue) {
             if (builder == null) {
                 if (pattern != null) {
@@ -90,7 +91,7 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     }
 
     @Override
-    public void onArrayEnd(AcmeJsonPath jpath) {
+    public void onArrayEnd(AcmeJsonPath jpath) throws IOException {
         if(!onValue) {
             if (builder != null && !builder.isDone()) {
                 builder.onArrayEnd(jpath);
@@ -103,7 +104,7 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     }
 
     @Override
-    public void onValue(AcmeJsonPath jpath, Object value) {
+    public void onValue(AcmeJsonPath jpath, Object value) throws IOException {
         if(onValue) {
             if (pattern != null) {
                 Matcher m = pattern.matcher(jpath.toString());
