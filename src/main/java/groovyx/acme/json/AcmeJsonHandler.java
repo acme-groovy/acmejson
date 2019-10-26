@@ -3,10 +3,10 @@ package groovyx.acme.json;
 import java.io.IOException;
 
 public interface AcmeJsonHandler {
-    void onObjectStart(AcmeJsonPath jpath)throws IOException;
-    void onObjectEnd(AcmeJsonPath jpath)throws IOException;
-    void onArrayStart(AcmeJsonPath jpath)throws IOException;
-    void onArrayEnd(AcmeJsonPath jpath)throws IOException;
-    void onValue(AcmeJsonPath jpath, Object value)throws IOException;
+    void onObjectStart(AbstractJsonPath jpath)throws IOException;
+    void onObjectEnd(AbstractJsonPath jpath)throws IOException;
+    void onArrayStart(AbstractJsonPath jpath)throws IOException;
+    void onArrayEnd(AbstractJsonPath jpath)throws IOException;
+    void onValue(AbstractJsonPath jpath, Object value)throws IOException;
     Object getRoot();
 }

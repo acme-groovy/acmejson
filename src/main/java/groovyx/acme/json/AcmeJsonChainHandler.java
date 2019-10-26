@@ -13,7 +13,7 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     Pattern pattern = null;
     String path = null;
     boolean hasNext = false;
-    AcmeJsonBuilder builder=null;
+    AcmeJsonBuildHandler builder=null;
     boolean onValue;
 
     public AcmeJsonChainHandler(){}
@@ -42,15 +42,15 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     }
 
     @Override
-    public void onObjectStart(AcmeJsonPath jpath) throws IOException {
+    public void onObjectStart(AbstractJsonPath jpath) throws IOException {
         if(!onValue) {
             if (builder == null) {
                 if (pattern != null) {
                     Matcher m = pattern.matcher(jpath.toString());
-                    if (m.matches()) builder = new AcmeJsonBuilder();
+                    if (m.matches()) builder = new AcmeJsonBuildHandler();
                 }
-                else if (path != null) {if (jpath.toString().equals(path)) builder = new AcmeJsonBuilder();}
-                else if (closure != null) builder = new AcmeJsonBuilder();
+                else if (path != null) {if (jpath.toString().equals(path)) builder = new AcmeJsonBuildHandler();}
+                else if (closure != null) builder = new AcmeJsonBuildHandler();
             }
             if (builder != null && !builder.isDone()) builder.onObjectStart(jpath);
         }
@@ -60,7 +60,7 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     }
 
     @Override
-    public void onObjectEnd(AcmeJsonPath jpath) throws IOException {
+    public void onObjectEnd(AbstractJsonPath jpath) throws IOException {
         if(!onValue) {
             if (builder != null && !builder.isDone()) {
                 builder.onObjectEnd(jpath);
@@ -73,15 +73,15 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     }
 
     @Override
-    public void onArrayStart(AcmeJsonPath jpath) throws IOException {
+    public void onArrayStart(AbstractJsonPath jpath) throws IOException {
         if(!onValue) {
             if (builder == null) {
                 if (pattern != null) {
                     Matcher m = pattern.matcher(jpath.toString());
-                    if (m.matches()) builder = new AcmeJsonBuilder();
+                    if (m.matches()) builder = new AcmeJsonBuildHandler();
                 }
-                else if (path != null) {if (jpath.toString().equals(path)) builder = new AcmeJsonBuilder();}
-                else if (closure != null) builder = new AcmeJsonBuilder();
+                else if (path != null) {if (jpath.toString().equals(path)) builder = new AcmeJsonBuildHandler();}
+                else if (closure != null) builder = new AcmeJsonBuildHandler();
             }
             if (builder != null && !builder.isDone()) builder.onArrayStart(jpath);
         }
@@ -91,7 +91,7 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     }
 
     @Override
-    public void onArrayEnd(AcmeJsonPath jpath) throws IOException {
+    public void onArrayEnd(AbstractJsonPath jpath) throws IOException {
         if(!onValue) {
             if (builder != null && !builder.isDone()) {
                 builder.onArrayEnd(jpath);
@@ -104,7 +104,7 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
     }
 
     @Override
-    public void onValue(AcmeJsonPath jpath, Object value) throws IOException {
+    public void onValue(AbstractJsonPath jpath, Object value) throws IOException {
         if(onValue) {
             if (pattern != null) {
                 Matcher m = pattern.matcher(jpath.toString());
@@ -119,10 +119,10 @@ public class AcmeJsonChainHandler implements AcmeJsonHandler {
             if (builder==null){
                 if (pattern != null) {
                     Matcher m = pattern.matcher(jpath.toString());
-                    if (m.matches()) builder = new AcmeJsonBuilder();
+                    if (m.matches()) builder = new AcmeJsonBuildHandler();
                 }
-                else if (path != null) {if (jpath.toString().equals(path)) builder = new AcmeJsonBuilder();}
-                else if (closure != null) builder = new AcmeJsonBuilder();
+                else if (path != null) {if (jpath.toString().equals(path)) builder = new AcmeJsonBuildHandler();}
+                else if (closure != null) builder = new AcmeJsonBuildHandler();
             }
             if(builder!=null && !builder.isDone()) builder.onValue(jpath, value);
         }

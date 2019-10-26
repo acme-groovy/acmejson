@@ -3,28 +3,26 @@ package groovyx.acme.json;
 import groovy.lang.Writable;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class AcmeJsonOutput implements Writable{
-    AcmeJsonWriter writer;
-    AcmeJsonPath jpath;
+    AcmeJsonWriteHandler writer;
+    ListJsonPath jpath;
     boolean indent = false;
     Object root = null;
 
     public AcmeJsonOutput(Object root){
         writer = null;
-        jpath = new AcmeJsonPath();
+        jpath = new ListJsonPath();
         this.root = root;
     }
 
 
     @Override
     public Writer writeTo(Writer out) throws IOException {
-        writer = new AcmeJsonWriter(out);
-        writer.setIndent(indent);
+        writer = new AcmeJsonWriteHandler(out);
+        writer.setPrettyPrint(indent);
         parseValue(root);
         return out;
     }
@@ -41,8 +39,8 @@ public class AcmeJsonOutput implements Writable{
         Map map = (Map)object;
         Iterator keys = map.keySet().iterator();
         for(int i=0;keys.hasNext();i++) {
-            jpath.push(new AcmeJsonPath.Element(i, (String)keys.next()));
-            Object value = map.get(jpath.peek().key);
+            jpath.push(i, (String)keys.next(), true);
+            Object value = map.get(jpath.peek().getKey());
             parseValue(value);
             jpath.pop();
         }
@@ -58,7 +56,7 @@ public class AcmeJsonOutput implements Writable{
 
         for(int i=0;arr.hasNext();i++) {
             Object value = arr.next();
-            jpath.push(new AcmeJsonPath.Element(i, null));
+            jpath.push(i, null, false);
             parseValue(value);
             jpath.pop();
         }
