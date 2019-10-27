@@ -27,7 +27,7 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
 
 
     public void testGson()throws Exception{
-        def o = new GsonParser().parseText("[\""+("abcdefgh1234567890"*200)+"\","+json+"]");
+        def o = new TestGsonParser().parseText("[\""+("abcdefgh1234567890"*200)+"\","+json+"]");
         assert o[1].i1==12345
         assert o[1].d4==-0.123
         assert o[1].i2==-12345

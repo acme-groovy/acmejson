@@ -5,10 +5,11 @@ import java.io.Reader;
 import java.io.StringReader;
 import com.google.gson.Gson;
 
-public class GsonParser extends AbstractJsonParser{
+/**class for test purposes only to compare speed of parsing to gson*/
+public class TestGsonParser extends AbstractJsonParser{
 
-    public GsonParser() {}
-    public GsonParser(AcmeJsonHandler handler) {}
+    public TestGsonParser() {}
+    public TestGsonParser(AcmeJsonHandler handler) {}
 
 
     @Override

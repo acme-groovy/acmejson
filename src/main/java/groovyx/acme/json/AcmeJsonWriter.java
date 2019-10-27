@@ -125,7 +125,7 @@ public class AcmeJsonWriter {
 
     /**
      * internal method to print array to json writer.
-     * @param object array to print
+     * @param arr array to print
      * @throws IOException if error occurred
      */
     protected void printIterator(Iterator arr) throws IOException {

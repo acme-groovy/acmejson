@@ -2,5 +2,5 @@
 
 call load.cmd AcmeJsonParser
 echo ---
-call load.cmd GsonParser
+call load.cmd TestGsonParser
 echo ---

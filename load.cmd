@@ -10,5 +10,5 @@ exit /B 0
 :doone
 rem echo "call %1"
 ping localhost -n 1 > nul
-call groovy -cp "/Users/dmytro.lukyanov/.groovy/grapes/com.google.code.gson/gson/jars/gson-2.8.5.jar;./build/classes/java/main"  .\src\load\AcmeJsonLoadTest.groovy %PARM%
+call groovy -cp "%USERPROFILE%/.groovy/grapes/com.google.code.gson/gson/jars/gson-2.8.5.jar;./build/classes/java/main;./build/classes/groovy/test"  .\src\load\AcmeJsonLoadTest.groovy %PARM%
 exit /B 0
