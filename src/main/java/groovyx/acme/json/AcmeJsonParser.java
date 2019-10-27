@@ -130,7 +130,7 @@ public class AcmeJsonParser extends AbstractJsonParser{
     }
 
     @Override
-    protected Object doParse(Reader reader) throws AcmeJsonParserException, IOException {
+    protected Object doParse(Reader reader) throws AcmeJsonException, IOException {
         this.in = reader;
         this.read();
         return handler.getRoot();
@@ -1203,8 +1203,8 @@ public class AcmeJsonParser extends AbstractJsonParser{
      * Throws a new IO exception with the given message and a context snippet
      * with this reader's content.
      */
-    private IOException syntaxError(String message) throws AcmeJsonParserException {
-        throw new AcmeJsonParserException(message + locationString());
+    private IOException syntaxError(String message) throws AcmeJsonException {
+        throw new AcmeJsonException(message + locationString());
     }
 
     /**

@@ -17,7 +17,7 @@ public class AcmeJsonWriter {
      */
     public AcmeJsonWriter(Writer out, boolean prettyPrint){
         writer = new AcmeJsonWriteHandler(out);
-        writer.setPrettyPrint(true);
+        writer.setPrettyPrint(prettyPrint);
     }
 
     /**

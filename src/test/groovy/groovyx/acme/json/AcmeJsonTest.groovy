@@ -1,9 +1,10 @@
 /***/
 package groovyx.acme.json
-//@groovy.transform.CompileStatic
+
+import groovy.json.JsonOutput
+
 public class AcmeJsonTest extends groovy.util.GroovyTestCase {
 
-    //static String json = "{\"x\":\"y\\n\\t\\u0420\\u0001z\",\"o\":"+R(" \t",220000)+"{\"aaa\":1,\"b\":[21,{\"22\":2}"+R(",23,24,255,266,9991,9992,9993,9994",100)+"],\"c\":3,\"d\":\"y\\n\\tz\"}}";
     static String json = '''
         {
             "s1":"123\\n\\t456\\u0420-\\u0001",
@@ -177,6 +178,23 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
         }.parseText("[\""+("abcdefgh1234567890"*200)+"\","+json+"]")
         def j=new groovy.json.JsonSlurper().parseText(w.toString())
         assert j[1].a1[4].zzz==['a','bb','ccc','dddd',[asdf:-123.45]]
+    }
+
+    public void testAcmeJsonOutput(){
+        def j=['a','bb','ccc','dddd',[asdf:-123.45]]
+        def s1 = AcmeJsonOutput.toJson(j)
+        def s2 = JsonOutput.toJson(j)
+        assert s1== s2
+    }
+
+    public void testAcmeJsonOutput1(){
+        def s1 = AcmeJsonOutput.toJson("hello world")
+        assert s1=='"hello world"'
+    }
+
+    public void testAcmeJsonOutput2(){
+        def s1 = AcmeJsonOutput.toJson("hello\nworld\t!")
+        assert s1=='"hello\\nworld\\t!"'
     }
 
     /*

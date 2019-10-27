@@ -35,13 +35,13 @@ public abstract class AbstractJsonParser {
         return this;
     }
 
-    public Object parse(Reader reader) throws AcmeJsonParserException{
+    public Object parse(Reader reader) throws AcmeJsonException {
         if(handler==null)handler=new AcmeJsonBuildHandler();
         if(reader==null)throw new NullPointerException("reader == null");
         try {
             return doParse(reader);
         }catch(IOException e){
-            throw new AcmeJsonParserException( e.toString() , e );
+            throw new AcmeJsonException( e.toString() , e );
         }
     }
 
@@ -49,31 +49,31 @@ public abstract class AbstractJsonParser {
      * perform json parsing from reader in descendants
      * @param reader
      * @return
-     * @throws AcmeJsonParserException
+     * @throws AcmeJsonException
      */
-    protected abstract Object doParse(Reader reader) throws AcmeJsonParserException, IOException;
+    protected abstract Object doParse(Reader reader) throws AcmeJsonException, IOException;
 
 
-    public Object parseText(String text) throws AcmeJsonParserException {
+    public Object parseText(String text) throws AcmeJsonException {
         if (text == null || text.length() == 0) {
             throw new IllegalArgumentException("The JSON input text should neither be null nor empty.");
         }
         return parse(new StringReader(text));
     }
 
-    public Object parse(File file) throws AcmeJsonParserException {
+    public Object parse(File file) throws AcmeJsonException {
         return parse(file, null);
     }
 
 
-    public Object parse(File file, String charset) throws AcmeJsonParserException {
+    public Object parse(File file, String charset) throws AcmeJsonException {
         Reader reader = null;
         try {
             if (charset == null || charset.length() == 0) charset = "UTF-8";
             reader = ResourceGroovyMethods.newReader(file, charset);
             return parse(reader);
         } catch(IOException e) {
-            throw new AcmeJsonParserException("Failed to read file `"+file+"`: "+e.getMessage(), e);
+            throw new AcmeJsonException("Failed to read file `"+file+"`: "+e.getMessage(), e);
         } finally {
             if (reader != null) {
                 DefaultGroovyMethodsSupport.closeWithWarning(reader);
@@ -81,33 +81,33 @@ public abstract class AbstractJsonParser {
         }
     }
 
-    public Object parse(URL url) throws AcmeJsonParserException {
+    public Object parse(URL url) throws AcmeJsonException {
         return parseURL(url, null, null);
     }
 
 
-    public Object parse(URL url, Map params) throws AcmeJsonParserException {
+    public Object parse(URL url, Map params) throws AcmeJsonException {
         return parseURL(url, params, null);
     }
 
-    public Object parse(URL url, String charset) throws AcmeJsonParserException {
+    public Object parse(URL url, String charset) throws AcmeJsonException {
         return parseURL(url, null, charset);
     }
 
 
-    public Object parse(URL url, Map params, String charset) throws AcmeJsonParserException {
+    public Object parse(URL url, Map params, String charset) throws AcmeJsonException {
         return parseURL(url, params, charset);
     }
 
 
-    private Object parseURL(URL url, Map params, String charset) throws AcmeJsonParserException {
+    private Object parseURL(URL url, Map params, String charset) throws AcmeJsonException {
         Reader reader = null;
         try {
             if (charset == null || charset.length() == 0) charset = "UTF-8";
             reader = ResourceGroovyMethods.newReader(url, params, charset);
             return parse(reader);
         } catch(IOException e) {
-            throw new AcmeJsonParserException("Failed to open URL `"+url+"`: "+e.getMessage(), e);
+            throw new AcmeJsonException("Failed to open URL `"+url+"`: "+e.getMessage(), e);
         } finally {
             if (reader != null) {
                 DefaultGroovyMethodsSupport.closeWithWarning(reader);
