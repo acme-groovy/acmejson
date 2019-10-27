@@ -63,7 +63,7 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
         assert m.tokens[0].key=='aa'
         assert m.tokens[1].key=='bb'
         assert m.tokens[2].key=='cc'
-        def p = new ListJsonPath().push(0,'aa').push(0,'bb').push(0,'cc')
+        def p = new TestJsonPath().push(0,'aa').push(0,'bb').push(0,'cc')
         assert m.matches(p)
     }
 
@@ -71,7 +71,7 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
         def m = new JsonPathMatcher('$..bb.cc')
         assert m.tokens.size()==3
         assert m.tokens[0]==JsonPathMatcher.T_DEEP
-        def p = new ListJsonPath().push(0,'aa').push(0,'bb').push(0,'cc')
+        def p = new TestJsonPath().push(0,'aa').push(0,'bb').push(0,'cc')
         assert m.matches(p)
     }
 
@@ -79,7 +79,7 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
         def m = new JsonPathMatcher('$..cc')
         assert m.tokens.size()==2
         assert m.tokens[0]==JsonPathMatcher.T_DEEP
-        def p = new ListJsonPath().push(0,'aa').push(0,'bb').push(0,'cc')
+        def p = new TestJsonPath().push(0,'aa').push(0,'bb').push(0,'cc')
         assert m.matches(p)
     }
 
@@ -87,7 +87,7 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
         def m = new JsonPathMatcher('$..cc')
         assert m.tokens.size()==2
         assert m.tokens[0]==JsonPathMatcher.T_DEEP
-        def p = new ListJsonPath().push(0,'aa').push(0,'bb').push(3,null).push(0,'cc')
+        def p = new TestJsonPath().push(0,'aa').push(0,'bb').push(3,null).push(0,'cc')
         assert m.matches(p)
     }
 
@@ -95,7 +95,7 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
         def m = new JsonPathMatcher('$.aa..')
         assert m.tokens.size()==2
         assert m.tokens[1]==JsonPathMatcher.T_DEEP
-        def p = new ListJsonPath().push(0,'aa').push(0,'bb').push(3,null).push(0,'cc')
+        def p = new TestJsonPath().push(0,'aa').push(0,'bb').push(3,null).push(0,'cc')
         assert m.matches(p)
     }
 
@@ -103,7 +103,7 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
         def m = new JsonPathMatcher('$[*].bb.cc')
         assert m.tokens.size()==3
         assert m.tokens[0]==JsonPathMatcher.T_ANY
-        def p = new ListJsonPath().push(0,'aa').push(0,'bb').push(0,'cc')
+        def p = new TestJsonPath().push(0,'aa').push(0,'bb').push(0,'cc')
         assert m.matches(p)
     }
 
@@ -138,7 +138,6 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
     public void testFilterSubstValuesAndObj(){
         def o = new AcmeJsonParser().withFilter {
             onValue('$..a1[*]'){Object v, AbstractJsonPath p->
-                println "$p -> $v"
                 return  v
             }
             build()
@@ -147,32 +146,75 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
         assert o[1].i1==12345
         assert o[1].d4==-0.123
         assert o[1].i2==-12345
+        assert o[1].a1[4]==[xxx:11,yyy:22]
         assert o[0]==("abcdefgh1234567890"*200)
     }
 
-    public void testFilterAndWrite(){
-        new File("./build/tmp/write.json").withWriter("UTF-8") { w ->
-            new AcmeJsonParser().withFilter {
-                onValue('$..a1[*]') { Object v, AbstractJsonPath p ->
-                    println "$p -> $v"
-                    return v
-                }
-                write(w,true)
-            }.parseText("[\"" + ("abcdefgh1234567890" * 200) + "\"," + json + "]")
-        }
+    public void testFilterAndWrite1(){
+        def json1 = '''
+            [
+                {"x":1, "y":[1,2,{"z1":111, "z2":222, "z3":[123,456]}]},
+                [11,22]
+            ]
+        '''
+        def w = new StringWriter();
+        new AcmeJsonParser().withFilter {
+            write(w).setIndent('    ')
+        }.parseText(json1)
+        //println w.toString()
+        //println groovy.json.JsonOutput.prettyPrint(json1)
+        assert groovy.json.JsonOutput.prettyPrint(json1) == w.toString()
     }
 
-    public void testJsonWrite(){
-        new File("./build/tmp/write.json").withWriter("UTF-8"){w->
-            def jw = new AcmeJsonWriteHandler(w,true);
-            //jw.onArrayStart()
-            for(int i=0;i<1000000;i++){
-
+    public void testFilterAndWrite2(){
+        def w = new StringWriter();
+        new AcmeJsonParser().withFilter {
+            onValue('$..a1[*]'){v,p->
+                if(v instanceof Map)v.zzz=['a','bb','ccc','dddd',[asdf:-123.45]]
+                v
             }
+            write(w,true)
+        }.parseText("[\""+("abcdefgh1234567890"*200)+"\","+json+"]")
+        def j=new groovy.json.JsonSlurper().parseText(w.toString())
+        assert j[1].a1[4].zzz==['a','bb','ccc','dddd',[asdf:-123.45]]
+    }
 
+    /*
+    public void testJsonWrite(){
+        def j = new AcmeJsonParser().parseText(json)
+        def f = new File("./build/tmp.json")
+        if(f.exists())return
+        new File("./build/tmp.json").withWriter("UTF-8"){w->
+            def jw = new AcmeJsonWriter(w,true);
+            jw.array {
+                for(int i=0;i<10000000;i++){
+                    j.sindex = "index# "+i
+                    jw.value(j)
+                }
+            }
         }
     }
 
+    public void testScanLarge(){
+        testJsonWrite()
+        def f = new File("./build/tmp.json")
+        int count = 0
+        new AcmeJsonParser().withFilter {
+            onValue('$[*]'){
+                count++
+            }
+        }.parse(f)
+        assert count==10000000
+
+    }
+    */
+
+    /* should fail with out of memory
+    public void testParseLarge(){
+        testJsonWrite()
+        def j = new GsonParser().parse( new File("./build/tmp.json") )
+    }
+    */
 
 
 
@@ -248,13 +290,13 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
     public void testAcmeOutput(){
         println "\nOutput:"
         println "was:\n"+json+"\nout:"
-        println new AcmeJsonOutput(new AcmeJsonParser().parseText(json)).setIndent(true).writeTo(new StringWriter())
+        println new AcmeJsonWriter(new AcmeJsonParser().parseText(json)).setIndent(true).writeTo(new StringWriter())
     }
 
     public void testAcmeParserEach(){
         println "\nParser using each:"
         println "jpath: "+path
-        new AcmeJsonParser().each(path){jpath, obj->println new AcmeJsonOutput(obj).setIndent(true).writeTo(new StringWriter())}.parseText(json);
+        new AcmeJsonParser().each(path){jpath, obj->println new AcmeJsonWriter(obj).setIndent(true).writeTo(new StringWriter())}.parseText(json);
     }
     */
 }

@@ -31,6 +31,14 @@ dependencies {
 }
 
 compileJava {
-//	options.compilerArgs += ["-g:none", "-Xlint:unchecked"]
+	options.compilerArgs += ["-g:none", "-Xlint:unchecked"]
 }
 
+compileTestGroovy {
+	options.compilerArgs += ["-g:none", "-Xlint:unchecked"]
+}
+
+test {
+	minHeapSize = "256m"
+	maxHeapSize = "256m"
+}

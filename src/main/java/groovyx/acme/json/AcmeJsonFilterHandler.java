@@ -194,15 +194,21 @@ public class AcmeJsonFilterHandler implements AcmeJsonHandler {
         /**
          * defines the delegate handler to be AcmeJsonWriteHandler that writes json to writer from json source
          */
-        public void write(Writer w, boolean prettyPrint){
-            if(w==null)setDelegate( new AcmeJsonNullHandler() );
-            else setDelegate( new AcmeJsonWriteHandler(w,prettyPrint) );
+        public AcmeJsonWriteHandler write(Writer w, boolean prettyPrint){
+            if(w==null){
+                setDelegate( new AcmeJsonNullHandler() );
+                return null;
+            } else {
+                AcmeJsonWriteHandler h = new AcmeJsonWriteHandler(w,prettyPrint);
+                setDelegate( h );
+                return h;
+            }
         }
         /**
          * defines the delegate handler to be AcmeJsonWriteHandler that writes json to writer from json source
          */
-        public void write(Writer w){
-            write(w,false);
+        public AcmeJsonWriteHandler write(Writer w){
+            return write(w,false);
         }
 
     }

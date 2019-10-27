@@ -2,18 +2,29 @@ package groovyx.acme.json;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Iterator;
+import java.util.Map;
 
 public class AcmeJsonWriteHandler implements AcmeJsonHandler{
 
     Writer writer;
     boolean space=false;  //without indent by default
     int indent = 0;
+    CharSequence indentChars = "  ";
 
     //private char [] buf = new char[512]; //to bufferize writing to writer
     //private int bufpos = 0;
 
     public AcmeJsonWriteHandler(Writer writer){
         this.writer=writer;
+    }
+
+    /** creates new write handler and initializes with the same parameters (writer, indent size, pretty print, etc)*/
+    public AcmeJsonWriteHandler(AcmeJsonWriteHandler parent){
+        this.writer=parent.writer;
+        this.indent=parent.indent;
+        this.indentChars=parent.indentChars;
+        this.space=parent.space;
     }
 
     public AcmeJsonWriteHandler(Writer writer, boolean prettyPrint){
@@ -25,6 +36,12 @@ public class AcmeJsonWriteHandler implements AcmeJsonHandler{
         this.space = prettyPrint;
         return this;
     }
+    /**set character sequence to be used as indent value. automatically sets PrettyPrint to true. returns self.*/
+    public AcmeJsonWriteHandler setIndent(CharSequence s){
+        this.space = true;
+        this.indentChars = s;
+        return this;
+    }
 
     @Override
     public void onObjectStart(AbstractJsonPath jpath) throws IOException {
@@ -33,11 +50,11 @@ public class AcmeJsonWriteHandler implements AcmeJsonHandler{
             if(space) printIndent();
             if(jpath.peek().isKey()) {
                 printName(jpath.peek().getKey());
-                if(space) indent += 2;
+                //if(space) indent += 1;
             }
         }
-        if(space) indent++;
         writer.write('{');
+        if(space) indent++;
     }
 
 
@@ -46,7 +63,7 @@ public class AcmeJsonWriteHandler implements AcmeJsonHandler{
         if(space) indent--;
         if(space) printIndent();
         writer.write('}');
-        if(space && jpath.size()>0 && jpath.peek().isKey()) indent-=2;
+        //if(space && indent>0) indent-=1;
         //if(jpath.size()==0)flush();
     }
 
@@ -55,10 +72,12 @@ public class AcmeJsonWriteHandler implements AcmeJsonHandler{
         if(jpath.size()>0) {
             if (jpath.peek().getIndex() > 0) writer.write(',');
             if(space)printIndent();
-            if(jpath.peek().isKey()) printName(jpath.peek().getKey());
+            if(jpath.peek().isKey()) {
+                printName(jpath.peek().getKey());
+            }
         }
-        if(space) indent++;
         writer.write('[');
+        if(space) indent++;
     }
 
     @Override
@@ -66,7 +85,7 @@ public class AcmeJsonWriteHandler implements AcmeJsonHandler{
         if(space) indent--;
         if(space)printIndent();
         writer.write(']');
-        if(space && jpath.size()>0 && jpath.peek().isKey()) indent-=2;
+        //if(space && jpath.size()>0 && jpath.peek().isKey()) indent-=2;
         //if(jpath.size()==0)flush();
     }
 
@@ -74,9 +93,11 @@ public class AcmeJsonWriteHandler implements AcmeJsonHandler{
 
     @Override
     public void onValue(AbstractJsonPath jpath, Object value) throws IOException {
-        if (jpath.peek().getIndex() > 0) writer.write(',');
-        if(space)printIndent();
-        if(jpath.peek().isKey()) printName(jpath.peek().getKey());
+        if(jpath.size()>0) {
+            if (jpath.peek().getIndex() > 0) writer.write(',');
+            if(space)printIndent();
+            if(jpath.peek().isKey()) printName(jpath.peek().getKey());
+        }
         printValue(value);
         //if(jpath.size()==0)flush();
     }
@@ -96,6 +117,9 @@ public class AcmeJsonWriteHandler implements AcmeJsonHandler{
             writer.write(o.toString());
         }else if(o instanceof CharSequence){
             printString(o.toString(),writer);
+        }else if(o instanceof Map || o instanceof Iterator || o instanceof Iterable){
+            AcmeJsonWriter w = new AcmeJsonWriter(this);
+            w.printValue(o);
         }else{
             printString(o.toString(),writer);
         }
@@ -103,6 +127,7 @@ public class AcmeJsonWriteHandler implements AcmeJsonHandler{
     private void printName(String n) throws IOException {
         printString(n,writer);
         writer.write(':');
+        if(space)writer.write(' ');
     }
     private static final char[] hex = "0123456789ABCDEF".toCharArray();
     //prints json-escaped string ignoring unicode escaping
@@ -138,6 +163,6 @@ public class AcmeJsonWriteHandler implements AcmeJsonHandler{
 
     private void printIndent() throws IOException {
         writer.write('\n');
-        for (int i = 0; i < indent; i++)writer.write("  ");
+        for (int i = 0; i < indent; i++)writer.append(indentChars);
     }
 }

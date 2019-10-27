@@ -1,9 +1,10 @@
 package groovyx.acme.json;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
-public class ListJsonPath extends AbstractJsonPath{
-    private LinkedList<Element> path = new LinkedList();
+/**simple implementation for test purposes*/
+public class TestJsonPath extends AbstractJsonPath{
+    private ArrayList<Element> path = new ArrayList<Element>();
     @Override
     public int size() {
         return path.size();
@@ -16,19 +17,25 @@ public class ListJsonPath extends AbstractJsonPath{
 
     @Override
     public Element peek() {
-        return path.peek();
+        return path.get( path.size()-1 );
     }
 
-    public ListJsonPath push(int index, String key){
+    public TestJsonPath push(int index, String key){
         return push(index,key, key!=null);
     }
-    public ListJsonPath push(int index, String key, boolean isKey){
+    public TestJsonPath push(int index, String key, boolean isKey){
         Element e = new Element(index, key, isKey);
         this.path.add(e);
         return this;
     }
+    /**removes last*/
     public Element pop(){
-        return path.pop();
+        return path.remove(path.size()-1);
+    }
+    /**removes last or if empty returns null*/
+    public Element popOrNull(){
+        if(path.size()>0)return path.remove(path.size()-1);
+        return null;
     }
 
     @Override
