@@ -104,11 +104,13 @@ public class JsonPathMatcher {
                 case S_KEY:
                     if(c=='.'){
                         String key=spath.substring(start,i);
-                        add(new JPToken(key));
+                        if(key.equals("*"))add(T_ANY);
+                        else add(new JPToken(key));
                         state=S_DOT;
                     }else if(c=='['){
                         String key=spath.substring(start,i);
-                        add(new JPToken(key));
+                        if(key.equals("*"))add(T_ANY);
+                        else add(new JPToken(key));
                         state=S_BR_S;
                     }else{
                         //nothing to do.
@@ -144,7 +146,8 @@ public class JsonPathMatcher {
         }
         if(state==S_KEY) {
             String key = spath.substring(start);
-            add(new JPToken(key));
+            if(key.equals("*"))add(T_ANY);
+            else add(new JPToken(key));
         }
     }
 
