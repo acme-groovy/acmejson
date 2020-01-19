@@ -237,9 +237,9 @@ public class AcmeJsonParser extends AbstractJsonParser{
         }
         if (p == PEEKED_END_ARRAY) {
             stackSize--;
+            handler.onArrayEnd(path); //DM:
             pathIndices[stackSize - 1]++;
             peeked = PEEKED_NONE;
-            handler.onArrayEnd(path); //DM:
         } else {
             throw new IllegalStateException("Expected END_ARRAY but was " + peekName() + locationString());
         }
@@ -274,10 +274,10 @@ public class AcmeJsonParser extends AbstractJsonParser{
         }
         if (p == PEEKED_END_OBJECT) {
             stackSize--;
+            handler.onObjectEnd(path); //DM:
             pathNames[stackSize] = null; // Free the last path name so that it can be garbage collected!
             pathIndices[stackSize - 1]++;
             peeked = PEEKED_NONE;
-            handler.onObjectEnd(path); //DM:
         } else {
             throw new IllegalStateException("Expected END_OBJECT but was " + peekName() + locationString());
         }

@@ -16,8 +16,8 @@ repositories {
 group = "acme.groovy"
 version = new Date().format("yyyyMMdd")
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+//sourceCompatibility = 1.7
+//targetCompatibility = 1.7
 //============================================
 
 
@@ -34,11 +34,11 @@ dependencies {
 }
 
 compileJava {
-	options.compilerArgs += ["-g:none", "-Xlint:unchecked"]
+	options.compilerArgs += ["-g:source,lines,vars", "-Xlint:unchecked"]
 }
 
 compileTestGroovy {
-	options.compilerArgs += ["-g:none", "-Xlint:unchecked"]
+	options.compilerArgs += ["-g:source,lines,vars", "-Xlint:unchecked"]
 }
 
 test {
