@@ -4,7 +4,7 @@ The goal is to allow json processing in stream mode
 
 ### grab it
 ```groovy
-@Grab(group='acme.groovy', module='acmejson', version='20191029')
+@Grab(group='acme.groovy', module='acmejson', version='20200120')
 ```
 
 
