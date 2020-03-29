@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 
 /**
- * provides easy way to build a sequence of closures to manipulate parsing values with closures and pass result into the delegate
+ * provides easy way to build a sequence of closures to catch json reading events and manipulate values
  */
 public class AcmeJsonFilterHandler implements AcmeJsonHandler {
     protected int size=0; //number of filters
@@ -22,7 +22,7 @@ public class AcmeJsonFilterHandler implements AcmeJsonHandler {
 
     /**
      * sets the delegation handler that will be called as a handler after all filtered values
-     * @param delegate
+     * @param delegate the delegate handler where all events will be transferred after events were filtered
      * @return self
      */
     public AcmeJsonFilterHandler setDelegate(AcmeJsonHandler delegate){
@@ -32,6 +32,7 @@ public class AcmeJsonFilterHandler implements AcmeJsonHandler {
 
     /**
      * returns current delegate or null
+     * @return current delegate or null
      */
     public AcmeJsonHandler getDelegate(){
         return delegate;
@@ -191,8 +192,12 @@ public class AcmeJsonFilterHandler implements AcmeJsonHandler {
         public void build(){
             setDelegate( new AcmeJsonBuildHandler());
         }
+
         /**
          * defines the delegate handler to be AcmeJsonWriteHandler that writes json to writer from json source
+         * @param w where to write json
+         * @param prettyPrint should we format json
+         * @return the new write handler
          */
         public AcmeJsonWriteHandler write(Writer w, boolean prettyPrint){
             if(w==null){
@@ -206,6 +211,8 @@ public class AcmeJsonFilterHandler implements AcmeJsonHandler {
         }
         /**
          * defines the delegate handler to be AcmeJsonWriteHandler that writes json to writer from json source
+         * @param w where to write json without formatting
+         * @return the new write handler
          */
         public AcmeJsonWriteHandler write(Writer w){
             return write(w,false);

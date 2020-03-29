@@ -14,6 +14,8 @@ public class AcmeJsonWriter {
 
     /**
      * creates internal write handler to perform json writing
+     * @param out where to write output
+     * @param prettyPrint true if the json must be formatted
      */
     public AcmeJsonWriter(Writer out, boolean prettyPrint){
         writer = new AcmeJsonWriteHandler(out);
@@ -21,7 +23,8 @@ public class AcmeJsonWriter {
     }
 
     /**
-     * initialize with external write handler
+     * initialize with external (delegated) write handler
+     * @param w the json write handler
      */
     public AcmeJsonWriter(AcmeJsonWriteHandler w){
         writer = w;
@@ -29,6 +32,8 @@ public class AcmeJsonWriter {
 
     /**
      * writes array start bracket to the underlying write handler
+     * @return this object
+     * @throws IOException if IO error occurred
      */
     public AcmeJsonWriter arrayStart() throws IOException{
         jpath.assertReadyForValue();
@@ -38,7 +43,9 @@ public class AcmeJsonWriter {
     }
 
     /**
-     * writes array start bracket to the underlying write handler
+     * writes array end bracket to the underlying write handler
+     * @return this object
+     * @throws IOException if IO error occurred
      */
     public AcmeJsonWriter arrayEnd() throws IOException{
         jpath.pop(false);
@@ -48,7 +55,9 @@ public class AcmeJsonWriter {
     }
 
     /**
-     * writes array start bracket to the underlying write handler
+     * writes object start bracket to the underlying write handler
+     * @return this object
+     * @throws IOException if IO error occurred
      */
     public AcmeJsonWriter objectStart() throws IOException{
         jpath.assertReadyForValue();
@@ -58,7 +67,9 @@ public class AcmeJsonWriter {
     }
 
     /**
-     * writes array start bracket to the underlying write handler
+     * writes object end bracket to the underlying write handler
+     * @return this object
+     * @throws IOException if IO error occurred
      */
     public AcmeJsonWriter objectEnd() throws IOException{
         jpath.pop(true);
@@ -66,8 +77,12 @@ public class AcmeJsonWriter {
         jpath.prepareNext();
         return this;
     }
+
     /**
      * prepares to write json object key
+     * @param key the key of the json object to write
+     * @return this object
+     * @throws IOException if io error occurred
      */
     public AcmeJsonWriter key(String key) throws IOException{
         jpath.setCurrentKey(key);
@@ -76,6 +91,9 @@ public class AcmeJsonWriter {
 
     /**
      * writes plain value, json object, or json array value to output
+     * @param value the value to write to json
+     * @return this object
+     * @throws IOException if io error occurred
      */
     public AcmeJsonWriter value(Object value) throws IOException{
         jpath.assertReadyForValue();
@@ -86,6 +104,9 @@ public class AcmeJsonWriter {
 
     /**
      * writes array start, executes closure, and writes array end
+     * @param c closure to process json array
+     * @return this object
+     * @throws IOException if io error occurred
      */
     public AcmeJsonWriter array(Closure c) throws IOException{
         arrayStart();
@@ -96,6 +117,9 @@ public class AcmeJsonWriter {
 
     /**
      * writes object-start, executes closure, and writes object-end
+     * @param c closure that called on `object` event
+     * @return this object
+     * @throws IOException if io error occurred
      */
     public AcmeJsonWriter object(Closure c) throws IOException{
         objectStart();

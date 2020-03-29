@@ -21,6 +21,9 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
+/**
+ * main json parser. check usage examples: https://github.com/acme-groovy/acmetemplate
+ */
 public class AcmeJsonParser extends AbstractJsonParser{
     /** The only non-execute prefix this parser permits */
     private static final char[] NON_EXECUTE_PREFIX = ")]}'\n".toCharArray();
@@ -165,6 +168,8 @@ public class AcmeJsonParser extends AbstractJsonParser{
      *       {@code :}.
      *   <li>Name/value pairs separated by {@code ;} instead of {@code ,}.
      * </ul>
+     * @param lenient true to set liberal parser mode, false (default) to set strict mode
+     * @return itself
      */
     public final AcmeJsonParser setLenient(boolean lenient) {
         this.lenient = lenient;
@@ -172,7 +177,8 @@ public class AcmeJsonParser extends AbstractJsonParser{
     }
 
     /**
-     * Returns true if this parser is liberal in what it accepts.
+     * Returns true if this parser is liberal in what it accepts (non-quoted keys acceptable)
+     * @return true if liberal, false if parser in strict mode
      */
     public final boolean isLenient() {
         return lenient;

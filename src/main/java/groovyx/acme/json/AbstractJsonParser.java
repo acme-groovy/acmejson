@@ -47,9 +47,10 @@ public abstract class AbstractJsonParser {
 
     /**
      * perform json parsing from reader in descendants
-     * @param reader
-     * @return
-     * @throws AcmeJsonException
+     * @param reader that will be used as a json source
+     * @return the object returned by handler after parsing. if default handler used then parsed json will be placed in map/list sequence.
+     * @throws AcmeJsonException if there was a parsing error
+     * @throws IOException if IO error occurred
      */
     protected abstract Object doParse(Reader reader) throws AcmeJsonException, IOException;
 

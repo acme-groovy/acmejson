@@ -5,6 +5,9 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * json handler that writes json events to output writer
+ */
 public class AcmeJsonWriteHandler implements AcmeJsonHandler{
 
     Writer writer;
@@ -19,24 +22,42 @@ public class AcmeJsonWriteHandler implements AcmeJsonHandler{
         this.writer=writer;
     }
 
-    /** creates new write handler and initializes with the same parameters (writer, indent size, pretty print, etc)*/
-    public AcmeJsonWriteHandler(AcmeJsonWriteHandler parent){
-        this.writer=parent.writer;
-        this.indent=parent.indent;
-        this.indentChars=parent.indentChars;
-        this.space=parent.space;
+    /**
+     * creates new write handler and initializes with the same parameters as the `other` handler (writer, indent size, pretty print, etc)
+     * @param other the other handler to inherit parameters from
+     */
+    public AcmeJsonWriteHandler(AcmeJsonWriteHandler other){
+        this.writer=other.writer;
+        this.indent=other.indent;
+        this.indentChars=other.indentChars;
+        this.space=other.space;
     }
 
+    /**
+     * create new handler with writer and prettyPrint flag
+     * @param writer writer where to write json
+     * @param prettyPrint true if we need to format output json
+     */
     public AcmeJsonWriteHandler(Writer writer, boolean prettyPrint){
         this.space=prettyPrint;
         this.writer=writer;
     }
 
+    /**
+     * set prettyPrint flag
+     * @param prettyPrint true if we need to format output json
+     * @return this object
+     */
     public AcmeJsonWriteHandler setPrettyPrint(boolean prettyPrint){
         this.space = prettyPrint;
         return this;
     }
-    /**set character sequence to be used as indent value. automatically sets PrettyPrint to true. returns self.*/
+
+    /**
+     * set character sequence to be used as indent value. automatically sets PrettyPrint to true.
+     * @param s char sequence to use as indent value ( {@code default="  "} )
+     * @return returns self
+     */
     public AcmeJsonWriteHandler setIndent(CharSequence s){
         this.space = true;
         this.indentChars = s;

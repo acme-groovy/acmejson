@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Stack;
 
+/**
+ * default json handler that builds a sequence of LinkedHashMap/ArrayList objects that represent the json data.
+ */
 public class AcmeJsonBuildHandler implements AcmeJsonHandler {
     Stack<Object> objectStack;
     Object current;

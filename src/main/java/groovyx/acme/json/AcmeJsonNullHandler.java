@@ -2,6 +2,9 @@ package groovyx.acme.json;
 
 import java.io.IOException;
 
+/**
+ * json handler does nothing and returns null as a final object.
+ */
 public class AcmeJsonNullHandler implements AcmeJsonHandler{
 
     @Override

@@ -6,12 +6,12 @@ import java.util.Arrays;
 /**
  * Class to parse and later match json path. It supports only simple paths like <code>$.key1.[*]["key2"]..key3</code>.
  * Where
- * <table border="0" cellpadding="1" cellspacing="0">
- *     <tr><td>$</td><td>root of document and must be present</td></tr>
- *     <tr><td>..</td><td>any depth must be followed by key</td></tr>
- *     <tr><td>[*]</td><td>matches to any key including any element in array</td></tr>
- *     <tr><td>["key"]</td><td>matches key. use this notation if key contains spec symbols (space, dot, etc)</td></tr>
- *     <tr><td>[int]</td><td>matches exact array element where int could be greater or equals to 0</td></tr>
+ * <table summary="">
+ *     <tr class="rowColor"><td>$</td><td>root of document and must be present</td></tr>
+ *     <tr class="rowColor"><td>..</td><td>any depth must be followed by key</td></tr>
+ *     <tr class="rowColor"><td>[*]</td><td>matches to any key including any element in array</td></tr>
+ *     <tr class="rowColor"><td>["key"]</td><td>matches key. use this notation if key contains spec symbols (space, dot, etc)</td></tr>
+ *     <tr class="rowColor"><td>[int]</td><td>matches exact array element where int could be greater or equals to 0</td></tr>
  * </table>
  *
  * Note: no spaces allowed.
@@ -39,7 +39,7 @@ public class JsonPathMatcher {
 
     /**
      * parses string path and builds internal list of predicates
-     * @param spath
+     * @param spath the string representation of json path
      */
     public JsonPathMatcher(String spath){
         int len=spath.length();
