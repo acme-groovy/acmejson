@@ -218,6 +218,14 @@ public class AcmeJsonTest extends groovy.util.GroovyTestCase {
         assert w.toString()==j
     }
 
+    public void test_AcmeJsonWriter(){
+        def json = new AcmeJsonWriter(new StringWriter(),false).object{
+            key("event").value( [name:'test', message: 'ipsum lorem' ] )
+            key("array").value( 1..5 )
+        }.writer.toString()
+        assert json == '{"event":{"name":"test","message":"ipsum lorem"},"array":[1,2,3,4,5]}'
+    }
+
 
     /*
     public void testJsonWrite(){

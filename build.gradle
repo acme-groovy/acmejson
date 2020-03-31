@@ -48,7 +48,8 @@ test {
 
 
 //load / create default props
-new File("local.properties").with{f->
+//new File("local.properties").with{f->
+project.file("local.properties").with{f->
 	new Properties().with{p->
 		if(f.exists()){
 			println "load $f"

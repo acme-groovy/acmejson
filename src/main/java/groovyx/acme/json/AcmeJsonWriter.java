@@ -8,12 +8,22 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
 
+/**
+ * streaming json writer that could be used to write large json objects dynamically directly to output writer.
+ * <pre>{@code
+ *  def json = new AcmeJsonWriter(new StringWriter(),false).object{
+ *      key("event").value( [name:'test', message: 'ipsum lorem' ] )
+ *      key("array").value( 1..5 )
+ *  }.writer.toString()
+ *  assert json == '{"event":{"name":"test","message":"ipsum lorem"},"array":[1,2,3,4,5]}'
+ * }</pre>
+ */
 public class AcmeJsonWriter {
     AcmeJsonWriteHandler writer;
     JsonPath jpath  = new JsonPath();
 
     /**
-     * creates internal write handler to perform json writing
+     * creates json writer
      * @param out where to write output
      * @param prettyPrint true if the json must be formatted
      */
@@ -28,6 +38,18 @@ public class AcmeJsonWriter {
      */
     public AcmeJsonWriter(AcmeJsonWriteHandler w){
         writer = w;
+    }
+
+    /**
+     * returns writer used to write json. the writer flushed just before return.
+     * @return writer
+     */
+    public Writer getWriter(){
+        Writer w = (Writer)writer.getRoot();
+        try {
+            if(w!=null)w.flush();
+        }catch (IOException e){}
+        return w;
     }
 
     /**
@@ -104,12 +126,13 @@ public class AcmeJsonWriter {
 
     /**
      * writes array start, executes closure, and writes array end
-     * @param c closure to process json array
+     * @param c closure to write content of the array by using {@code value(...)} or other methods to write nested objcts/arrays
      * @return this object
      * @throws IOException if io error occurred
      */
     public AcmeJsonWriter array(Closure c) throws IOException{
         arrayStart();
+        c.setDelegate(this);
         c.call();
         arrayEnd();
         return this;
@@ -117,12 +140,14 @@ public class AcmeJsonWriter {
 
     /**
      * writes object-start, executes closure, and writes object-end
-     * @param c closure that called on `object` event
+     * @param c closure that called between object-start and object-end.
+     *          use method {@code key('keyName')} to write key and {@code value(someValue)} to write value or other methods to write nested objcts/arrays.
      * @return this object
      * @throws IOException if io error occurred
      */
     public AcmeJsonWriter object(Closure c) throws IOException{
         objectStart();
+        c.setDelegate(this);
         c.call();
         objectEnd();
         return this;
