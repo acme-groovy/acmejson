@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 
 /**
- * main json parser. check usage examples: https://github.com/acme-groovy/acmetemplate
+ * MAIN JSON PARSER CLASS. check usage examples on <a href="https://github.com/acme-groovy/acmejson" target="_top">github</a>
  */
 public class AcmeJsonParser extends AbstractJsonParser{
     /** The only non-execute prefix this parser permits */
@@ -1235,7 +1235,9 @@ public class AcmeJsonParser extends AbstractJsonParser{
         pos += NON_EXECUTE_PREFIX.length;
     }
 
-
+    /**
+     * json path implementation for parsing purpose
+     */
     public class JsonPath extends AbstractJsonPath{
         Element e = new Element();
         @Override
@@ -1314,18 +1316,5 @@ public class AcmeJsonParser extends AbstractJsonParser{
          */
         static final int CLOSED = 8;
     }
-    public final class JsonParseException extends IOException {
-        private static final long serialVersionUID = 1L;
-
-        public JsonParseException(String msg) {
-            super(msg);
-        }
-
-        public JsonParseException(String msg, Throwable throwable) {
-            super(msg);
-            initCause(throwable);
-        }
-    }
-
 
 }

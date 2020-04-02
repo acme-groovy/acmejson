@@ -2,6 +2,9 @@ package groovyx.acme.json;
 
 import java.io.IOException;
 
+/**
+ * interface with json parsing events definition used in parsers, writers, builders, etc.
+ */
 public interface AcmeJsonHandler {
     void onObjectStart(AbstractJsonPath jpath)throws IOException;
     void onObjectEnd(AbstractJsonPath jpath)throws IOException;

@@ -14,7 +14,7 @@ repositories {
 
 //============================================
 group = "acme.groovy"
-version = new Date().format("yyyyMMdd")
+version = new Date().format("yy.MM.dd")
 
 //sourceCompatibility = 1.7
 //targetCompatibility = 1.7
