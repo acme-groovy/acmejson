@@ -25,6 +25,7 @@ def data = new AcmeJsonParser().withFilter{
 			//return value is a replacement of the old one
 			return value+10000
 		}
+		build()
 	}.parseText( '[{"a":1,"b":2, "ddd":[1,2,3]}]' )
 assert data[0].ddd[0]==10001
 assert data[0].ddd[1]==10002
